@@ -30,4 +30,5 @@ jobs:
         env:
           TOKEN_DE_ACESSO: ${{ secrets.TOKEN_DE_ACESSO }}
           ID_USUARIO_INSTAGRAM: ${{ secrets.ID_USUARIO_INSTAGRAM }}
+          ong_info_raw: "ong_info_raw"
         run: python etl_meta.py
