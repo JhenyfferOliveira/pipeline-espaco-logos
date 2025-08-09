@@ -23,6 +23,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests pandas gspread oauth2client
 
+      - name: Setup Google Credentials file
+        run: echo "${{ secrets.GOOGLE_CREDENTIALS_B64 }}" | base64 --decode > credenciais.json
+
       - name: Run ETL script
         env:
           TOKEN_DE_ACESSO: ${{ secrets.TOKEN_DE_ACESSO }}
