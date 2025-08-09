@@ -39,7 +39,10 @@ def salvar_raw_no_sheets(dados):
     except gspread.WorksheetNotFound:
         aba = planilha.add_worksheet(title='raw', rows='1000', cols='20')
 
-    df = pd.DataFrame(dados)
+    # Filtrar só os dados com timestamp
+    dados_filtrados = [item for item in dados if 'timestamp' in item]
+    df = pd.DataFrame(dados_filtrados)
+
     df['timestamp'] = pd.to_datetime(df['timestamp'])
     df['timestamp'] = df['timestamp'].dt.floor('S').dt.strftime('%Y-%m-%d %H:%M:%S')
 
