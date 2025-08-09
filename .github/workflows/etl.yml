@@ -1,0 +1,30 @@
+﻿name: ETL Meta Instagram
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # todo domingo às 00:00 UTC
+  workflow_dispatch:
+
+jobs:
+  etl:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests pandas gspread oauth2client
+
+      - name: Run ETL script
+        env:
+          TOKEN_DE_ACESSO: ${{ secrets.TOKEN_DE_ACESSO }}
+          ID_USUARIO_INSTAGRAM: ${{ secrets.ID_USUARIO_INSTAGRAM }}
+        run: python etl_meta.py
