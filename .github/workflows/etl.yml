@@ -28,7 +28,7 @@ jobs:
 
       - name: Run ETL script
         env:
-          TOKEN_DE_ACESSO: ${{ secrets.TOKEN_DE_ACESSO }}
-          ID_USUARIO_INSTAGRAM: ${{ secrets.ID_USUARIO_INSTAGRAM }}
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
           ong_info_raw: "ong_info_raw"
         run: python etl_meta.py
