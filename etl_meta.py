@@ -1,61 +1,81 @@
-﻿import requests
+﻿import requests, gspread, os
 import pandas as pd
-from datetime import datetime
-import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-import os, json
 
-TOKEN_DE_ACESSO = os.environ.get("TOKEN_DE_ACESSO")
-ID_USUARIO_INSTAGRAM = os.environ.get("ID_USUARIO_INSTAGRAM")
+ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN")
+INSTAGRAM_USER_ID = os.environ.get("INSTAGRAM_USER_ID")
 GOOGLE_CREDENTIALS_JSON = os.getenv("GOOGLE_CREDENTIALS_JSON")
-NOME_PLANILHA = os.getenv("ong_info_raw")
+SPREADSHEET_NAME = os.getenv("ong_info_raw")
 
-def buscar_midias_do_usuario():
-    url = f"https://graph.facebook.com/v19.0/{ID_USUARIO_INSTAGRAM}/media"
+print("ACCESS_TOKEN:", ACCESS_TOKEN)
+print("INSTAGRAM_USER_ID:", INSTAGRAM_USER_ID)
+
+def get_user_media():
+    url = f"https://graph.facebook.com/v19.0/{INSTAGRAM_USER_ID}/media"
     params = {
         'fields': 'id,caption,media_type,timestamp,permalink,like_count,comments_count',
-        'access_token': TOKEN_DE_ACESSO,
+        'access_token': ACCESS_TOKEN,
         'limit': 100
     }
-    todas_midias = []
+    
+    all_midia = []
+    
     while url:
-        r = requests.get(url, params=params if not todas_midias else None)
-        dados = r.json()
-        todas_midias.extend(dados.get('data', []))
-        url = dados.get('paging', {}).get('next')
+        r = requests.get(url, params=params if not all_midia else None)
+        data = r.json()
+        all_midia.extend(data.get('data', []))
+        url = data.get('paging', {}).get('next')
         params = None
-    return todas_midias
+    
+    return all_midia
 
-def salvar_raw_no_sheets(dados):
+def save_raw_data_to_sheets(data):
+    print(f"Quantidade de itens recebidos: {len(data)}")
+    if len(data) > 0:
+        print(f"Chaves do primeiro item: {data[0].keys()}")
+    else:
+        print("Nenhum dado recebido!")
+
+    # Autenticação e planilha
     scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
     creds = ServiceAccountCredentials.from_json_keyfile_name("credenciais.json", scope)
     client = gspread.authorize(creds)
-
-    planilha = client.open(NOME_PLANILHA)
+    spreadsheet = client.open(SPREADSHEET_NAME)
 
     try:
-        aba = planilha.worksheet('raw')
-        aba.clear()
+        sheet = spreadsheet.worksheet('raw')
+        sheet.clear()
     except gspread.WorksheetNotFound:
-        aba = planilha.add_worksheet(title='raw', rows='1000', cols='20')
+        sheet = spreadsheet.add_worksheet(title='raw', rows='1000', cols='20')
 
-    # Filtrar só os dados com timestamp
-    dados_filtrados = [item for item in dados if 'timestamp' in item]
-    df = pd.DataFrame(dados_filtrados)
+    # Filtra só os dados com timestamp
+    filtered_data = [item for item in data if 'timestamp' in item]
+    print(f"Quantidade de itens com 'timestamp': {len(filtered_data)}")
 
-    df['timestamp'] = pd.to_datetime(df['timestamp'])
-    df['timestamp'] = df['timestamp'].dt.floor('S').dt.strftime('%Y-%m-%d %H:%M:%S')
+    df = pd.DataFrame(filtered_data)
+    print(f"Colunas do DataFrame: {df.columns.tolist()}")
+
+    if 'timestamp' in df.columns:
+        df['timestamp'] = pd.to_datetime(df['timestamp'])
+        df['timestamp'] = df['timestamp'].dt.floor('S').dt.strftime('%Y-%m-%d %H:%M:%S')
+    else:
+        print("Coluna 'timestamp' não encontrada no DataFrame")
 
     df = df.replace([float('inf'), float('-inf')], 0)
     df = df.fillna(0)
 
-    valores = [df.columns.values.tolist()] + df.values.tolist()
-    aba.update(valores)
+    values = [df.columns.values.tolist()] + df.values.tolist()
+
+    if values and len(values) > 1:
+        sheet.update(values)
+    else:
+        print("Nada para atualizar na planilha.")
+
 
 def main():
-    midias = buscar_midias_do_usuario()
-    salvar_raw_no_sheets(midias)
+    midias = get_user_media()
+    save_raw_data_to_sheets(midias)
     print(f"{len(midias)} posts salvos na aba 'raw' da planilha.")
 
 if __name__ == "__main__":
-    main()
+    main()  
