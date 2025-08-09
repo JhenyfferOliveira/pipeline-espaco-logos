@@ -75,7 +75,8 @@ def save_raw_data_to_sheets(data):
         print("Nenhum dado recebido!")
 
     scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-    creds = ServiceAccountCredentials.from_json_keyfile_name(GOOGLE_CREDENTIALS_JSON, scope)
+    credentials_dict = json.loads(GOOGLE_CREDENTIALS_JSON)
+    creds = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
     client = gspread.authorize(creds)
     spreadsheet = client.open(SPREADSHEET_NAME)
 
