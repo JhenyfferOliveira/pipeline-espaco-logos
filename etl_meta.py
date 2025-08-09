@@ -39,8 +39,11 @@ def salvar_raw_no_sheets(dados):
         aba = planilha.add_worksheet(title='raw', rows='1000', cols='20')
 
     df = pd.DataFrame(dados)
-    # Ajuste para timestamp legível
-    df['timestamp'] = pd.to_datetime(df['timestamp']).dt.strftime('%Y-%m-%d %H:%M:%S')
+    df['timestamp'] = pd.to_datetime(df['timestamp'])
+
+    df = df.replace([float('inf'), float('-inf')], 0)
+    df = df.fillna(0)
+
     valores = [df.columns.values.tolist()] + df.values.tolist()
     aba.update(valores)
 
