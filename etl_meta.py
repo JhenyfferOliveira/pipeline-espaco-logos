@@ -40,7 +40,7 @@ def salvar_raw_no_sheets(dados):
 
     df = pd.DataFrame(dados)
     # Ajuste para timestamp legível
-    df['timestamp'] = pd.to_datetime(df['timestamp'])
+    df['timestamp'] = pd.to_datetime(df['timestamp']).dt.strftime('%Y-%m-%d %H:%M:%S')
     valores = [df.columns.values.tolist()] + df.values.tolist()
     aba.update(valores)
 
