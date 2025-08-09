@@ -7,7 +7,7 @@ import os, json
 
 TOKEN_DE_ACESSO = os.environ.get("TOKEN_DE_ACESSO")
 ID_USUARIO_INSTAGRAM = os.environ.get("ID_USUARIO_INSTAGRAM")
-GOOGLE_CREDENTIALS_JSON = os.getenv("GOOGLE_CREDENTIALS_JSON")  # conteúdo JSON da chave
+GOOGLE_CREDENTIALS_JSON = os.getenv("GOOGLE_CREDENTIALS_JSON")
 NOME_PLANILHA = os.getenv("ong_info_raw")
 
 def buscar_midias_do_usuario():
@@ -41,15 +41,13 @@ def salvar_raw_no_sheets(dados):
 
     df = pd.DataFrame(dados)
     df['timestamp'] = pd.to_datetime(df['timestamp'])
-
-    df['timestamp'] = df['timestamp'].dt.strftime('%Y-%m-%d')
+    df['timestamp'] = df['timestamp'].dt.floor('S').dt.strftime('%Y-%m-%d %H:%M:%S')
 
     df = df.replace([float('inf'), float('-inf')], 0)
     df = df.fillna(0)
 
     valores = [df.columns.values.tolist()] + df.values.tolist()
     aba.update(valores)
-
 
 def main():
     midias = buscar_midias_do_usuario()
