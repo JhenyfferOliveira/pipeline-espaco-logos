@@ -41,6 +41,10 @@ def salvar_raw_no_sheets(dados):
     df = pd.DataFrame(dados)
     df['timestamp'] = pd.to_datetime(df['timestamp'])
 
+    # Converte Timestamp para string (formato yyyy-mm-dd) para evitar erro JSON
+    df['timestamp'] = df['timestamp'].dt.strftime('%Y-%m-%d')
+
+    # Substitui valores infinitos e NaNs para evitar erros
     df = df.replace([float('inf'), float('-inf')], 0)
     df = df.fillna(0)
 
