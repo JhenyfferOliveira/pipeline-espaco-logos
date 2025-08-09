@@ -28,8 +28,7 @@ def buscar_midias_do_usuario():
 
 def salvar_raw_no_sheets(dados):
     scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-    cred_dict = json.loads(GOOGLE_CREDENTIALS_JSON)
-    creds = ServiceAccountCredentials.from_json_keyfile_dict(cred_dict, scope)
+    creds = ServiceAccountCredentials.from_json_keyfile_name("credenciais.json", scope)
     client = gspread.authorize(creds)
 
     planilha = client.open(NOME_PLANILHA)
@@ -42,6 +41,7 @@ def salvar_raw_no_sheets(dados):
 
     df = pd.DataFrame(dados)
     df['timestamp'] = pd.to_datetime(df['timestamp'])
+
     df['timestamp'] = df['timestamp'].dt.strftime('%Y-%m-%d')
 
     df = df.replace([float('inf'), float('-inf')], 0)
@@ -49,6 +49,7 @@ def salvar_raw_no_sheets(dados):
 
     valores = [df.columns.values.tolist()] + df.values.tolist()
     aba.update(valores)
+
 
 def main():
     midias = buscar_midias_do_usuario()
