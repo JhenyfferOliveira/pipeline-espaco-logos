@@ -1,4 +1,4 @@
-﻿import requests, gspread, os
+﻿import requests, gspread, os, json
 import pandas as pd
 from oauth2client.service_account import ServiceAccountCredentials
 
@@ -10,7 +10,7 @@ SPREADSHEET_NAME = os.getenv("ong_info_raw")
 print("ACCESS_TOKEN:", ACCESS_TOKEN)
 print("INSTAGRAM_USER_ID:", INSTAGRAM_USER_ID)
 
-def get_user_media():
+def get_user_media_with_insights():
     url = f"https://graph.facebook.com/v19.0/{INSTAGRAM_USER_ID}/media"
     params = {
         'fields': 'id,caption,media_type,timestamp,permalink,like_count,comments_count',
@@ -18,16 +18,54 @@ def get_user_media():
         'limit': 100
     }
     
-    all_midia = []
-    
+    all_media = []
     while url:
-        r = requests.get(url, params=params if not all_midia else None)
+        r = requests.get(url, params=params if not all_media else None)
         data = r.json()
-        all_midia.extend(data.get('data', []))
+        all_media.extend(data.get('data', []))
         url = data.get('paging', {}).get('next')
         params = None
+
+    # Requisição batch para salvamentos e compartilhamentos
+    media_ids = [m['id'] for m in all_media]
+    insights = batch_fetch_insights(media_ids)
     
-    return all_midia
+    for media in all_media:
+        media_id = media['id']
+        media_insights = insights.get(media_id, {"saved": 0, "shares": 0})
+        media['saved'] = media_insights.get('saved', 0)
+        media['shares'] = media_insights.get('shares', 0)
+    
+    return all_media
+
+def batch_fetch_insights(media_ids):
+    url = "https://graph.facebook.com/v19.0/"
+    results = {}
+    
+    for i in range(0, len(media_ids), 50):
+        batch = []
+        batch_ids = media_ids[i:i+50]
+        for media_id in batch_ids:
+            batch.append({
+                "method": "GET",
+                "relative_url": f"{media_id}/insights?metric=saved,shares"
+            })
+
+        r = requests.post(url, params={'access_token': ACCESS_TOKEN}, json={"batch": batch})
+        responses = r.json()
+
+        for media_id, resp in zip(batch_ids, responses):
+            try:
+                data_json = json.loads(resp.get("body", "{}"))
+                metrics = {m['name']: m['values'][0]['value'] for m in data_json.get('data', [])}
+                results[media_id] = {
+                    "saved": metrics.get("saved", 0),
+                    "shares": metrics.get("shares", 0)
+                }
+            except Exception:
+                results[media_id] = {"saved": 0, "shares": 0}
+
+    return results
 
 def save_raw_data_to_sheets(data):
     print(f"Quantidade de itens recebidos: {len(data)}")
@@ -36,9 +74,8 @@ def save_raw_data_to_sheets(data):
     else:
         print("Nenhum dado recebido!")
 
-    # Autenticação e planilha
     scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-    creds = ServiceAccountCredentials.from_json_keyfile_name("credenciais.json", scope)
+    creds = ServiceAccountCredentials.from_json_keyfile_name(GOOGLE_CREDENTIALS_JSON, scope)
     client = gspread.authorize(creds)
     spreadsheet = client.open(SPREADSHEET_NAME)
 
@@ -48,7 +85,6 @@ def save_raw_data_to_sheets(data):
     except gspread.WorksheetNotFound:
         sheet = spreadsheet.add_worksheet(title='raw', rows='1000', cols='20')
 
-    # Filtra só os dados com timestamp
     filtered_data = [item for item in data if 'timestamp' in item]
     print(f"Quantidade de itens com 'timestamp': {len(filtered_data)}")
 
@@ -61,8 +97,7 @@ def save_raw_data_to_sheets(data):
     else:
         print("Coluna 'timestamp' não encontrada no DataFrame")
 
-    df = df.replace([float('inf'), float('-inf')], 0)
-    df = df.fillna(0)
+    df = df.replace([float('inf'), float('-inf')], 0).fillna(0)
 
     values = [df.columns.values.tolist()] + df.values.tolist()
 
@@ -71,11 +106,10 @@ def save_raw_data_to_sheets(data):
     else:
         print("Nada para atualizar na planilha.")
 
-
 def main():
-    midias = get_user_media()
-    save_raw_data_to_sheets(midias)
-    print(f"{len(midias)} posts salvos na aba 'raw' da planilha.")
+    media_with_insights = get_user_media_with_insights()
+    save_raw_data_to_sheets(media_with_insights)
+    print(f"{len(media_with_insights)} posts salvos na aba 'raw' da planilha.")
 
 if __name__ == "__main__":
-    main()  
+    main()
