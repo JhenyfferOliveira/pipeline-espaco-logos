@@ -3,12 +3,11 @@ import pandas as pd
 from datetime import datetime
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-import json
-import os
+import os, json
 
 TOKEN_DE_ACESSO = os.environ.get("TOKEN_DE_ACESSO")
 ID_USUARIO_INSTAGRAM = os.environ.get("ID_USUARIO_INSTAGRAM")
-GOOGLE_CREDENTIALS_JSON = os.getenv("GOOGLE_CREDENTIALS_JSON")
+GOOGLE_CREDENTIALS_JSON = os.getenv("GOOGLE_CREDENTIALS_JSON")  # conteúdo JSON da chave
 NOME_PLANILHA = os.getenv("ong_info_raw")
 
 def buscar_midias_do_usuario():
@@ -29,7 +28,8 @@ def buscar_midias_do_usuario():
 
 def salvar_raw_no_sheets(dados):
     scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-    creds = ServiceAccountCredentials.from_json_keyfile_name(GOOGLE_CREDENTIALS_JSON, scope)
+    cred_dict = json.loads(GOOGLE_CREDENTIALS_JSON)
+    creds = ServiceAccountCredentials.from_json_keyfile_dict(cred_dict, scope)
     client = gspread.authorize(creds)
 
     planilha = client.open(NOME_PLANILHA)
@@ -42,11 +42,8 @@ def salvar_raw_no_sheets(dados):
 
     df = pd.DataFrame(dados)
     df['timestamp'] = pd.to_datetime(df['timestamp'])
-
-    # Converte Timestamp para string (formato yyyy-mm-dd) para evitar erro JSON
     df['timestamp'] = df['timestamp'].dt.strftime('%Y-%m-%d')
 
-    # Substitui valores infinitos e NaNs para evitar erros
     df = df.replace([float('inf'), float('-inf')], 0)
     df = df.fillna(0)
 
