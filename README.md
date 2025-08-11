@@ -24,7 +24,7 @@ O Espaço Logos de Cidadania Consciente atua na região da Tijuca (Rio de Janeir
    - Insere os dados brutos (raw) em uma aba chamada `raw` no Google Sheets (via API).
 
 4. **Automação**  
-   - GitHub Actions executa o script por agendamento (cron) ou manualmente (workflow_dispatch).
+   - GitHub Actions executa o script por agendamento (cron).
 
 5. **Visualização**  
    - Dados no Google Sheets são usados como fonte para dashboards no Looker.
