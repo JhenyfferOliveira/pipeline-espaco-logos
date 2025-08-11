@@ -33,10 +33,12 @@ O Espaço Logos de Cidadania Consciente atua na região da Tijuca (Rio de Janeir
 
 ## Dashoard 
 
+
+
 ---
 
 ## Ferramentas Utilizadas
 
 | Python | Google Sheets | Looker | GitHub Actions |
 | :----: | :-----------: | :----: | :------------: |
-| <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg" width="100"> | <img src="https://upload.wikimedia.org/wikipedia/commons/3/30/Google_Sheets_logo_%282014-2020%29.svg" width="50"> | <img src="https://www.svgrepo.com/show/354012/looker-icon.svg" width="80"> | <img src="https://icon.icepanel.io/Technology/svg/GitHub-Actions.svg" width="80"> |
+| <a href="https://www.python.org/" target="_blank"><img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg" width="100"></a> | <a href="https://www.google.com/sheets/about/" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/commons/3/30/Google_Sheets_logo_%282014-2020%29.svg" width="50"></a> | <a href="https://looker.com/" target="_blank"><img src="https://www.svgrepo.com/show/354012/looker-icon.svg" width="80"></a> | <a href="https://github.com/features/actions" target="_blank"><img src="https://icon.icepanel.io/Technology/svg/GitHub-Actions.svg" width="80"></a> |
