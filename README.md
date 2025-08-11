@@ -1,4 +1,4 @@
-# Coleta e Envio de Dados da Meta para o Google Sheets e Looker
+# Pipeline de Dados da Meta para Análise
 
 Projeto desenvolvido para a ONG **Espaço Logos de Cidadania Consciente**, uma organização que promove projetos educativos, culturais e esportivos para crianças e jovens.  
 Este repositório contém um ETL que coleta métricas do Instagram da ONG via **Instagram Graph API (Meta)**, salva os dados brutos no **Google Sheets** e alimenta dashboards no **Looker**, tudo automatizado com **GitHub Actions**.
