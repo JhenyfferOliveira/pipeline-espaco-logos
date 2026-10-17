@@ -59,8 +59,8 @@ Instagram Graph API ──► Python (ETL) ──► Google Sheets (aba raw) ─
 
 O dashboard foi pensado para uma pessoa sem perfil técnico: cada visualização responde a uma pergunta específica e traz um insight em linguagem simples. Em vez de valores absolutos, usa **médias por publicação**, para evitar distorções causadas pela concentração de posts em determinados formatos, dias e horários. Tem duas páginas.
 
-![Página 1](dashboard/Espaço_Logos_page-0001.jpg)
-![Página 1](dashboard/Espaço_Logos_page-0002.jpg)
+![Página 1](dashboard/Espaço_Logos_page-0001.webp)
+![Página 1](dashboard/Espaço_Logos_page-0002.webp)
 
 ## Página 1 – O Que Mais Chama Atenção
 
